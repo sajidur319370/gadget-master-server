@@ -28,19 +28,30 @@ async function run() {
       res.send(products);
     });
 
-    // =================get single product=============
+    // =================GET single product=============
     app.get("/inventory/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const product = await serviceCollection.findOne(query);
       res.send(product);
     });
-    // =================post single product=============
+
+    // =================POST single product=============
     app.post("/inventory", async (req, res) => {
       const newProduct = req.body;
       const result = await serviceCollection.insertOne(newProduct);
       res.send(result);
     });
+
+    // =================DELETE product=============
+    app.delete("/inventory/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await serviceCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // ===================================================
   } finally {
   }
 }
