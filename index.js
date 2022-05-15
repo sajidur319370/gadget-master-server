@@ -22,9 +22,22 @@ async function run() {
     await client.connect();
     const serviceCollection = client.db("gadgetMaster").collection("product");
     app.get("/inventory", async (req, res) => {
+      console.log("query", req.query);
+      const page = parseInt(req.query.page);
+      const size = parseInt(req.query.size);
       const query = {};
       const cursor = serviceCollection.find(query);
-      const products = await cursor.toArray();
+
+      let products;
+      if (page || size) {
+        products = await cursor
+          .skip(size * page)
+          .limit(size)
+          .toArray();
+      } else {
+        products = await cursor.toArray();
+      }
+
       res.send(products);
     });
 
@@ -49,6 +62,11 @@ async function run() {
       const query = { _id: ObjectId(id) };
       const result = await serviceCollection.deleteOne(query);
       res.send(result);
+    });
+    // =====================Pagination========================
+    app.get("/productCount", async (req, res) => {
+      const count = await serviceCollection.estimatedDocumentCount();
+      res.send({ count });
     });
 
     // ===================================================
