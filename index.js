@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
+const jwt = require("jsonwebtoken");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const { response } = require("express");
 const app = express();
@@ -9,6 +10,23 @@ const port = process.env.PORT || 5000;
 // middleware
 app.use(cors());
 app.use(express.json());
+
+// =================jwt function==================
+function verifyJWT(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(401).send({ message: "unauthorized access" });
+  }
+  const token = authHeader.split(" ")[1];
+  jwt.verify(token, process.env.ACCESS_TOKEN, (error, decoded) => {
+    if (error) {
+      return res.status(403).send({ message: "forbidden Access" });
+    }
+    console.log("decoded", decoded);
+    req.decoded = decoded;
+    next();
+  });
+}
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.rcxdj.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
@@ -42,6 +60,15 @@ async function run() {
       }
 
       res.send(products);
+    });
+
+    //================ AUTH=========================
+    app.post("/login", async (req, res) => {
+      const user = req.body;
+      const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN, {
+        expiresIn: "1d",
+      });
+      res.send({ accessToken });
     });
 
     // =================GET single product=============
@@ -80,12 +107,17 @@ async function run() {
       res.send(result);
     });
     // ========get User Collection=========================
-    app.get("/userItems", async (req, res) => {
+    app.get("/userItems", verifyJWT, async (req, res) => {
+      const decodedEmail = req.decoded.email;
       const email = req.query?.email;
-      const query = { email: email };
-      const cursor = userItemsCollection.find(query);
-      const userItems = await cursor.toArray();
-      res.send(userItems);
+      if (email === decodedEmail) {
+        const query = { email: email };
+        const cursor = userItemsCollection.find(query);
+        const userItems = await cursor.toArray();
+        res.send(userItems);
+      } else {
+        res.status(403).send({ message: "forbidden access" });
+      }
     });
     // =================DELETE product from User Collection=============
     app.delete("/userItems/:id", async (req, res) => {
