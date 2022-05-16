@@ -21,6 +21,9 @@ async function run() {
   try {
     await client.connect();
     const serviceCollection = client.db("gadgetMaster").collection("product");
+    const userItemsCollection = client
+      .db("gadgetMaster")
+      .collection("userItems");
     app.get("/inventory", async (req, res) => {
       console.log("query", req.query);
       const page = parseInt(req.query.page);
@@ -67,6 +70,13 @@ async function run() {
     app.get("/productCount", async (req, res) => {
       const count = await serviceCollection.estimatedDocumentCount();
       res.send({ count });
+    });
+
+    // =================User Collection Api====================
+    app.post("/userItems", async (req, res) => {
+      const userItems = req.body;
+      const result = await userItemsCollection.insertOne(userItems);
+      res.send(result);
     });
 
     // ===================================================
