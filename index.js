@@ -43,7 +43,6 @@ async function run() {
       .db("gadgetMaster")
       .collection("userItems");
     app.get("/inventory", async (req, res) => {
-      console.log("query", req.query);
       const page = parseInt(req.query.page);
       const size = parseInt(req.query.size);
       const query = {};
@@ -83,6 +82,24 @@ async function run() {
     app.post("/inventory", async (req, res) => {
       const newProduct = req.body;
       const result = await serviceCollection.insertOne(newProduct);
+      res.send(result);
+    });
+    // ===================Update quantity of Product===================
+    app.put("/inventory/:id", async (req, res) => {
+      const id = req.params.id;
+      const updateProduct = req.body;
+      const filter = { _id: ObjectId(id) };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          quantity: updateProduct.updateQuantity,
+        },
+      };
+      const result = await serviceCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
       res.send(result);
     });
 
