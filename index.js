@@ -59,13 +59,14 @@ async function run() {
       res.send(result);
     });
 
-    // =================DELETE product=============
+    // =================DELETE product from inventory=============
     app.delete("/inventory/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await serviceCollection.deleteOne(query);
       res.send(result);
     });
+
     // =====================Pagination========================
     app.get("/productCount", async (req, res) => {
       const count = await serviceCollection.estimatedDocumentCount();
@@ -76,6 +77,21 @@ async function run() {
     app.post("/userItems", async (req, res) => {
       const userItems = req.body;
       const result = await userItemsCollection.insertOne(userItems);
+      res.send(result);
+    });
+    // ========get User Collection=========================
+    app.get("/userItems", async (req, res) => {
+      const email = req.query?.email;
+      const query = { email: email };
+      const cursor = userItemsCollection.find(query);
+      const userItems = await cursor.toArray();
+      res.send(userItems);
+    });
+    // =================DELETE product from User Collection=============
+    app.delete("/userItems/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await userItemsCollection.deleteOne(query);
       res.send(result);
     });
 
