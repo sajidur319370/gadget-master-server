@@ -105,12 +105,12 @@ async function run() {
     // ===================Update quantity of Product===================
     app.put("/inventoryDelever/:id", async (req, res) => {
       const id = req.params.id;
-      const updateProduct = req.body;
+      const deleverProduct = req.body;
       const filter = { _id: ObjectId(id) };
       const options = { upsert: true };
       const updateDoc = {
         $set: {
-          quantity: updateProduct.updateQuantity,
+          quantity: updateProduct.deleverQuantity,
         },
       };
       const result = await serviceCollection.updateOne(
