@@ -85,7 +85,25 @@ async function run() {
       res.send(result);
     });
     // ===================Update quantity of Product===================
-    app.put("/inventory/:id", async (req, res) => {
+    app.put("/inventoryUpdate/:id", async (req, res) => {
+      const id = req.params.id;
+      const updateProduct = req.body;
+      const filter = { _id: ObjectId(id) };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          quantity: updateProduct.updateQuantity,
+        },
+      };
+      const result = await serviceCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
+      res.send(result);
+    });
+    // ===================Update quantity of Product===================
+    app.put("/inventoryDelever/:id", async (req, res) => {
       const id = req.params.id;
       const updateProduct = req.body;
       const filter = { _id: ObjectId(id) };
