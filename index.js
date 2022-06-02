@@ -8,8 +8,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 // middleware
-app.use(cors());
-app.use(cors({ origin: "https://gadget-master-c9a7a.firebaseapp.com/" }));
+app.use(cors({ origin: "*" }));
 app.use(express.json());
 
 // =================jwt function==================
